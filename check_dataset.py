@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
         mask = mask > 0.5
 
-        for category, category_image in draw_results(image, mask, categories=dataset.categories):
+        for category, category_image, mask_image in draw_results(image, mask, categories=dataset.categories):
             cv2.imshow(category, category_image)
 
         if cv2.waitKey(0) == ord('q'):
