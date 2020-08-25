@@ -1,4 +1,5 @@
 from .dataset import LabelMeDataset
+from .dataset import SkinDataset
 from .dataloaders import create_data_loaders
 
 from .models import models
