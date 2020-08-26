@@ -29,7 +29,8 @@ if __name__ == '__main__':
     logging.basicConfig(level=level)
 
     if args.skin:
-        dataset = SkinDataset(args.dataset, args.use_augmentation)
+        #dataset = SkinDataset(args.dataset, args.use_augmentation)
+        dataset = SkinDataset(args.dataset, args.use_augmentation,image_height=512, image_width=288)
     else:
         dataset = LabelMeDataset(args.dataset, args.use_augmentation)
 
