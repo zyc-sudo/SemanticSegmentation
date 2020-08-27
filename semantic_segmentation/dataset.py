@@ -184,7 +184,6 @@ class SkinDataset(data.Dataset):
         logging.debug('loading image')
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        print(image.shape)
         image_width = image.shape[1]
         image_height = image.shape[0]
 
