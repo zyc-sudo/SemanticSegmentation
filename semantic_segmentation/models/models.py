@@ -2,10 +2,12 @@ import torch
 import torch.nn as nn
 
 from .fcn import FCNResNet101
+from .fcn import FCNResNet50
 from .bisenetv2 import BiSeNetV2
 
 models = {
     'FCNResNet101': FCNResNet101,
+    'FCNResNet50': FCNResNet50,
     'BiSeNetV2': BiSeNetV2,
 }
 
