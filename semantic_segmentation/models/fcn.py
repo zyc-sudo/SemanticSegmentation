@@ -34,7 +34,7 @@ class FCNResNet50(nn.Module):
         self._categories = nn.ParameterDict({i: nn.Parameter(torch.Tensor(0)) for i in categories})
         num_categories = len(self._categories)
 
-        self.model = models.segmentation.fcn_resnet50(pretrained=False,num_classes=1)
+        self.model = models.segmentation.fcn_resnet50(pretrained=False,num_classes=num_categories)
 
     @property
     def categories(self):
