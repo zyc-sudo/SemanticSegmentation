@@ -11,6 +11,7 @@ from torch.utils import tensorboard
 
 from semantic_segmentation import LabelMeDataset
 from semantic_segmentation import SkinDataset
+from semantic_segmentation import MultiClassDataset
 from semantic_segmentation import create_data_loaders
 from semantic_segmentation import models
 from semantic_segmentation import LossWithAux
@@ -38,6 +39,7 @@ def parse_args():
     parser.add_argument('--num-epochs', type=int, default=30)
     parser.add_argument('--batch-size', type=int, default=2)
     parser.add_argument('--skin',  action='store_true')
+    parser.add_argument('--multiclass',  action='store_true')
 
     return parser.parse_args()
 
@@ -49,7 +51,10 @@ if __name__ == '__main__':
     logging.info('creating dataset and data loaders')
 
     # assert args.train != args.val
-    if args.skin:
+    if args.multiclass:
+        train_dataset = MultiClassDataset(args.train, use_augmentation=True,image_height=512, image_width=288)
+        val_dataset = MultiClassDataset(args.val, use_augmentation=False,image_height=512, image_width=288)
+    elif args.skin:
         train_dataset = SkinDataset(args.train, use_augmentation=True,image_height=512, image_width=288)
         val_dataset = SkinDataset(args.val, use_augmentation=False,image_height=512, image_width=288)
     else:

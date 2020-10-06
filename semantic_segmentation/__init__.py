@@ -1,5 +1,6 @@
 from .dataset import LabelMeDataset
 from .dataset import SkinDataset
+from .dataset import MultiClassDataset
 from .dataloaders import create_data_loaders
 
 from .models import models

@@ -201,3 +201,78 @@ class SkinDataset(data.Dataset):
 
         return target['image'], target['mask']
 
+# Another dataset which has image and corresponding multiple masks, all in image format
+class MultiClassDataset(data.Dataset):
+    def __init__(self, directory: str, use_augmentation: bool, image_height: int = 480, image_width: int = 480):
+        self.directory = pathlib.Path(directory)
+        self.use_augmentation = use_augmentation
+        assert self.directory.exists()
+        assert self.directory.is_dir()
+        self.image_paths = []
+        self.categories = collections.defaultdict(list)
+        categories = [] 
+        #figure out the category
+        for image_path in self.directory.rglob('*_img.png'):
+            subject_name = image_path.name.split('img')[0]
+            for item in self.directory.rglob(subject_name+"*"):
+                category = item.as_posix().split('.')[0].split('_')[-1]
+                if category != 'img':
+                    categories.append(category)
+            break
+
+        for image_path in self.directory.rglob('*_img.png'):
+            self.image_paths += [image_path]
+
+        self.categories = sorted(categories)
+
+        logging.info(f'loaded {len(self)} annotations from {self.directory}')
+        logging.info(f'use augmentation: {self.use_augmentation}')
+        logging.info(f'categories: {self.categories}')
+
+        aug_transforms = [ToTensor()]
+        if self.use_augmentation:
+            aug_transforms = [
+                alb.HueSaturationValue(always_apply=True),
+                alb.RandomBrightnessContrast(always_apply=True),
+                alb.HorizontalFlip(),
+                alb.RandomGamma(always_apply=True),
+                alb.ShiftScaleRotate(shift_limit=0.2, scale_limit=0.2, always_apply=True),
+                alb.PadIfNeeded(min_height=image_height, min_width=image_width, always_apply=True),
+                alb.RandomCrop(image_height, image_width, always_apply=True),
+            ] + aug_transforms
+        else:
+            aug_transforms = [
+                alb.PadIfNeeded(min_height=image_height, min_width=image_width, always_apply=True),
+                alb.CenterCrop(image_height, image_width, always_apply=True),
+            ] + aug_transforms
+
+        self.transforms = alb.Compose(transforms=aug_transforms)
+
+    def __len__(self):
+        return len(self.image_paths)
+
+    def __getitem__(self, idx: int):
+        image_path = self.image_paths[idx]
+        image_path = image_path.as_posix()
+        logging.debug('loading image')
+        image = cv2.imread(image_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image_width = image.shape[1]
+        image_height = image.shape[0]
+
+        assert image.shape == (image_height, image_width, 3)
+
+        logging.debug('creating segmentation masks per category')
+
+        num_categories = len(self.categories)
+        #put it to numpy.uint8 so that ToTensor will do the normalization
+        mask = numpy.zeros((num_categories, image_height, image_width), dtype=numpy.uint8)
+        for i, item in enumerate(self.categories):
+            mask_path = image_path.replace('img',item)
+            #manually normalize
+            mask[i] = cv2.imread(mask_path,cv2.IMREAD_GRAYSCALE)
+        mask = numpy.transpose(mask, (1, 2, 0))
+        logging.debug('applying transforms to image and mask')
+        target = self.transforms(image=image, mask=mask)
+
+        return target['image'], target['mask']
