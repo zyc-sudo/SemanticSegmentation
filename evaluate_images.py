@@ -23,6 +23,7 @@ def parse_args():
 
     parser.add_argument('--save', action='store_true')
     parser.add_argument('--display', action='store_true')
+    parser.add_argument('--excludemask', action='store_true')
 
     return parser.parse_args()
 
@@ -70,8 +71,11 @@ if __name__ == '__main__':
     )
 
     for image_file in find_files(image_dir, ['.png', '.jpg', '.jpeg']):
+        if 'mask' in image_file.as_posix():
+            continue
         logging.info(f'segmenting {image_file} with threshold of {args.threshold}')
 
+        s=time.time()
         image = fn_image_transform(image_file)
 
         with torch.no_grad():
