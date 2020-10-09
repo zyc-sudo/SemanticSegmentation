@@ -75,7 +75,6 @@ if __name__ == '__main__':
             continue
         logging.info(f'segmenting {image_file} with threshold of {args.threshold}')
 
-        s=time.time()
         image = fn_image_transform(image_file)
 
         with torch.no_grad():
